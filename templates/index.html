@@ -1,0 +1,111 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCCmi_FIlpgjIYCEQUMzW4TbgJlEP76ynE"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+         integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script
+			  src="https://code.jquery.com/jquery-3.4.1.min.js"
+			  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+              crossorigin="anonymous"></script>
+              
+    <script>
+        $( document ).ready(function() {
+
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                                
+                     };
+
+                     requisicaoAPI(pos);
+                }, function() {
+                    console.log("Erro ao definir posição atual");
+                });
+
+            
+            function requisicaoAPI(pos) {
+                urlAPI = "http://localhost:5000/hospitais/lista/lat/" + pos.lat + "/long/" +  pos.lng;
+                $.get(urlAPI, function( data ) {
+                    localizacoes = processarResposta(data);
+                    exibirMapa(localizacoes, pos);
+                });
+            }
+
+            function processarResposta(data) {
+                arrayDados = [];
+                i = 1;
+                for (obj in data) {
+                    arrayTemp = [];
+                    descricao = "<h6>" + data[obj].no_fantasia + "</h6><p>Leitos disponíveis: " + data[obj].qtd_leitos + "</p><p> Telefone: " + data[obj].nu_telefone + "</p>" ; 
+                    arrayTemp.push(descricao);
+                    arrayTemp.push(data[obj].lat);
+                    arrayTemp.push(data[obj].long);
+                    arrayTemp.push(i);
+
+                    arrayDados.push(arrayTemp);
+
+                    i++;
+                }
+
+                return arrayDados;
+            }
+
+            var infowindow, map;
+            function exibirMapa(locations, pos) {                 
+                    map = new google.maps.Map(document.getElementById('map'), {
+                        zoom: 10,
+                        center: new google.maps.LatLng(pos.lat, pos.lng),
+                        mapTypeId: google.maps.MapTypeId.ROADMAP
+                    });
+            
+                    infowindow = new google.maps.InfoWindow;
+
+                    var location = new google.maps.LatLng(pos.lat, pos.lng);
+                        marker = new google.maps.Marker({
+                                position: location,
+                                map: map,
+                                title: 'Sua Posição'
+                        });
+
+                    var marker, i;
+                    for (i = 0; i < locations.length; i++) { 
+                        marker = new google.maps.Marker({
+                            position: new google.maps.LatLng(locations[i][1], locations[i][2]),
+                            map: map,
+                            icon: {
+                                url: '/static/icon.svg',
+                                scaledSize: new google.maps.Size(40, 40)
+                            }
+                        });
+            
+                        google.maps.event.addListener(marker, 'click', (function(marker, i) {
+                            return function() {
+                                infowindow.setContent(locations[i][0]);
+                                infowindow.open(map, marker);
+
+                            }
+                        })(marker, i));
+                    }
+
+            }
+
+        });
+    </script>
+
+  </head>
+
+  <body>
+    <div class="container bg-faded py-3">
+        <h2 class="text-center">Hospitais mais próximos de você</h2>
+        <div class="row">
+            <div class="col">
+                <div class="mx-auto w-50 p-2 text-center">
+                    <div id="map" style="width: 700px; height: 600px"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </body>
+</html>
