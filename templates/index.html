@@ -8,6 +8,10 @@
 			  src="https://code.jquery.com/jquery-3.4.1.min.js"
 			  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
               crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" 
+    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" 
+    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
               
     <script>
         $( document ).ready(function() {
@@ -26,7 +30,7 @@
                 lat: -16.698305,
                 lng: -49.275838
             };
-            
+
             requisicaoAPI(pos);
             
             function requisicaoAPI(pos) {
@@ -75,11 +79,15 @@
 
                     var marker, i;
                     for (i = 0; i < locations.length; i++) { 
+                        if(i == 0) {
+                            $('#modal').modal('show');
+                            $('.modal-body').html(locations[i][0]);
+                        }
                         marker = new google.maps.Marker({
                             position: new google.maps.LatLng(locations[i][1], locations[i][2]),
                             map: map,
                             icon: {
-                                url: '/static/icon.svg',
+                                url: i ==0 ? '/static/icon2.webp' : '/static/icon.svg',
                                 scaledSize: new google.maps.Size(40, 40)
                             }
                         });
@@ -105,11 +113,33 @@
         <h2 class="text-center">Hospitais mais próximos de você</h2>
         <div class="row">
             <div class="col">
-                <div class="mx-auto w-50 p-2 text-center">
-                    <div id="map" style="width: 700px; height: 600px"></div>
+                <div class="mx-auto w-40 p-2 text-center">
+                    <div id="map" style="width: 100%; height: 500px;"></div>
                 </div>
             </div>
         </div>
     </div>
+
+
+    <div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Hospital Recomendado</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      
+
   </body>
 </html>

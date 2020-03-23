@@ -31,9 +31,11 @@ def calcular_distancia(origin, destination):
 
     return d
 
+def definir_distancia(row):
+  return calcular_distancia(endereco_idoso, (row['lat'], row['long']))
+
 def definir_mais_proximos(row):
-    distancia = calcular_distancia(endereco_idoso, (row['lat'], row['long']))
-    return distancia < raio_considerado
+  return row['distancia_km'] < raio_considerado
 
 
 @app.route("/")
@@ -46,10 +48,11 @@ def get_hospitais_proximos(lat, long):
     endereco_idoso = (float(lat), float(long))
     df = pd.read_csv('data/ubs_funcionamento.csv')
     df_ubs_estado = df#df[df['uf'] == estado]
+    df_ubs_estado['distancia_km'] = df_ubs_estado.apply(definir_distancia, axis=1)
     filtro = df_ubs_estado.apply(definir_mais_proximos, axis=1)
     df_proximos = df_ubs_estado[filtro]
     df_proximos_filtro =  df_proximos[df_proximos['qtd_leitos'] >= quantidade_minima_leitos]
-    df_retorno = df_proximos_filtro[['gid', 'lat', 'long', 'no_fantasia', 'nu_telefone', 'qtd_leitos']]
+    df_retorno = df_proximos_filtro[['gid', 'lat', 'long', 'no_fantasia', 'nu_telefone', 'qtd_leitos', 'distancia_km']]
     df_retorno = df_retorno.sort_values(by='qtd_leitos', ascending=False)[:quantidade_retorno]
 
     result_list = []
